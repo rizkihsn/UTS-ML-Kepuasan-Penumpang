@@ -64,7 +64,7 @@ UTS-ML-Kepuasan-Penumpang/
 
 Folder `01_colab/` berisi notebook `Kepuasan_Penumpang_RandomForest.ipynb` yang dirancang untuk dijalankan di **Google Colab** (menggunakan `google.colab.files` untuk unggah dataset dan unduh hasil model):
 
-1. Unduh dataset `airline_passenger_satisfaction.csv` dari [Kaggle](https://www.kaggle.com/datasets/mysarahmadbhat/airline-passenger-satisfaction).
+1. Unduh dataset `airline_passenger_satisfaction.csv` di folder data atau dari [Kaggle](https://www.kaggle.com/datasets/mysarahmadbhat/airline-passenger-satisfaction).
 2. Buka [colab.research.google.com](https://colab.research.google.com), lalu pilih **File > Upload notebook** dan unggah `01_colab/Kepuasan_Penumpang_RandomForest.ipynb`.
 3. Jalankan seluruh sel dari atas hingga bawah (**Runtime > Run all**). Saat sel unggah muncul, pilih file `airline_passenger_satisfaction.csv`.
 4. Di akhir eksekusi, notebook akan mengunduh arsip `model_kepuasan_penumpang.zip` berisi `model.joblib`, `metrics.json`, dan `feature_importance.json`.
