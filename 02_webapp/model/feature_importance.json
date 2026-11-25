@@ -1,0 +1,90 @@
+[
+  {
+    "feature": "Online Boarding",
+    "importance": 0.1792
+  },
+  {
+    "feature": "In-flight Wifi Service",
+    "importance": 0.1553
+  },
+  {
+    "feature": "Class",
+    "importance": 0.1051
+  },
+  {
+    "feature": "Type of Travel",
+    "importance": 0.1027
+  },
+  {
+    "feature": "In-flight Entertainment",
+    "importance": 0.0709
+  },
+  {
+    "feature": "Seat Comfort",
+    "importance": 0.0482
+  },
+  {
+    "feature": "Customer Type",
+    "importance": 0.0397
+  },
+  {
+    "feature": "Leg Room Service",
+    "importance": 0.0387
+  },
+  {
+    "feature": "Ease of Online Booking",
+    "importance": 0.0382
+  },
+  {
+    "feature": "On-board Service",
+    "importance": 0.0303
+  },
+  {
+    "feature": "Flight Distance",
+    "importance": 0.0268
+  },
+  {
+    "feature": "Age",
+    "importance": 0.0239
+  },
+  {
+    "feature": "Baggage Handling",
+    "importance": 0.0219
+  },
+  {
+    "feature": "In-flight Service",
+    "importance": 0.0209
+  },
+  {
+    "feature": "Cleanliness",
+    "importance": 0.0207
+  },
+  {
+    "feature": "Check-in Service",
+    "importance": 0.0192
+  },
+  {
+    "feature": "Departure and Arrival Time Convenience",
+    "importance": 0.0162
+  },
+  {
+    "feature": "Gate Location",
+    "importance": 0.014
+  },
+  {
+    "feature": "Food and Drink",
+    "importance": 0.011
+  },
+  {
+    "feature": "Arrival Delay",
+    "importance": 0.008
+  },
+  {
+    "feature": "Departure Delay",
+    "importance": 0.006
+  },
+  {
+    "feature": "Gender",
+    "importance": 0.0031
+  }
+]

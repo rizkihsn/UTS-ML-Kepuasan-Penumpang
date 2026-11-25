@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SKYSCORE · Prediksi Kepuasan Penumpang Maskapai</title>
+  <meta name="description" content="Prediksi kepuasan penumpang maskapai dari data perjalanan menggunakan model Random Forest.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%230b0907%27/%3E%3Cellipse cx=%2716%27 cy=%2716%27 rx=%277%27 ry=%2711%27 fill=%27none%27 stroke=%27%23c9a24b%27 stroke-width=%273%27/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <a href="#hero" class="nav__logo">SKYSCORE</a>
+  <nav class="nav__links" aria-label="Navigasi utama">
+    <a href="#statement">Tentang</a>
+    <a href="#prediksi">Prediksi</a>
+    <a href="#model">Model</a>
+  </nav>
+  <a href="#prediksi" class="nav__cta">Coba sekarang <span aria-hidden="true">↗</span></a>
+</header>
+
+<main>
+
+<!-- ============ HERO: jendela pesawat ============ -->
+<section class="hero" id="hero">
+  <div class="hero__sticky">
+    <div class="hero__copy" id="heroCopy">
+      <h1>Ketahui kepuasan<br>sebelum mendarat.</h1>
+      <span class="hero__rule"></span>
+      <p>Satu perjalanan, dua puluh dua data.<br>Sebuah cara baru membaca pengalaman terbang.</p>
+    </div>
+
+    <div class="window" id="window" aria-hidden="true">
+      <div class="window__ring">
+        <div class="window__glass"></div>
+      </div>
+    </div>
+
+    <a href="#statement" class="hero__scroll" id="heroScroll">Gulir ke bawah</a>
+  </div>
+</section>
+
+<!-- ============ PERNYATAAN: awan + teks menyala ============ -->
+<section class="statement" id="statement">
+  <div class="statement__inner">
+    <p class="eyebrow">Tentang proyek</p>
+    <p class="statement__text" id="statementText">
+      Ada cara lain untuk membaca sebuah penerbangan. Bukan dari ulasan yang datang terlambat, tetapi dari data perjalanan itu sendiri: kelas kabin, jarak, keterlambatan, dan empat belas penilaian layanan.
+    </p>
+
+    <div class="stats">
+      <div class="stat reveal">
+        <span class="stat__num" data-count="{{ metrics.n_rows }}" data-sep="1">0</span>
+        <span class="stat__label">Penumpang dalam dataset</span>
+      </div>
+      <div class="stat reveal">
+        <span class="stat__num" data-count="{{ metrics.n_features }}">0</span>
+        <span class="stat__label">Fitur perjalanan</span>
+      </div>
+      <div class="stat reveal">
+        <span class="stat__num" data-count="{{ (metrics.accuracy * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span>
+        <span class="stat__label">Akurasi pada data uji</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRANSISI KRIM: jet ============ -->
+<section class="fly" id="fly">
+  <div class="fly__sticky">
+    <span class="fly__word fly__word--l" id="flyL">Prediksi</span>
+    <svg class="jet" id="jet" viewBox="0 0 400 600" aria-hidden="true">
+      <defs>
+        <linearGradient id="jetBody" x1="0" x2="1">
+          <stop offset="0" stop-color="#0c0a08"/>
+          <stop offset="0.5" stop-color="#2a221a"/>
+          <stop offset="1" stop-color="#0c0a08"/>
+        </linearGradient>
+        <linearGradient id="jetWing" x1="0" x2="1">
+          <stop offset="0" stop-color="#14100c"/>
+          <stop offset="1" stop-color="#2b231b"/>
+        </linearGradient>
+      </defs>
+      <!-- sayap -->
+      <path d="M220 235 L382 362 L382 388 L220 332 Z" fill="url(#jetWing)" stroke="#c9a24b" stroke-width="1.2" stroke-opacity=".55"/>
+      <path d="M180 235 L18 362 L18 388 L180 332 Z" fill="url(#jetWing)" stroke="#c9a24b" stroke-width="1.2" stroke-opacity=".55"/>
+      <!-- ekor -->
+      <path d="M220 505 L292 556 L292 572 L220 548 Z" fill="url(#jetWing)" stroke="#c9a24b" stroke-width="1" stroke-opacity=".5"/>
+      <path d="M180 505 L108 556 L108 572 L180 548 Z" fill="url(#jetWing)" stroke="#c9a24b" stroke-width="1" stroke-opacity=".5"/>
+      <!-- mesin -->
+      <rect x="224" y="405" width="20" height="74" rx="10" fill="#0c0a08" stroke="#c9a24b" stroke-opacity=".6"/>
+      <rect x="156" y="405" width="20" height="74" rx="10" fill="#0c0a08" stroke="#c9a24b" stroke-opacity=".6"/>
+      <!-- badan -->
+      <path d="M200 10 C217 42 221 92 221 160 L221 470 C221 522 212 562 200 592 C188 562 179 522 179 470 L179 160 C179 92 183 42 200 10 Z" fill="url(#jetBody)" stroke="#c9a24b" stroke-width="1.3" stroke-opacity=".7"/>
+      <!-- kokpit -->
+      <path d="M200 52 C207 58 210 68 209 78 L191 78 C190 68 193 58 200 52 Z" fill="#c9a24b" fill-opacity=".35" stroke="#c9a24b" stroke-opacity=".8" stroke-width=".8"/>
+      <!-- garis emas badan -->
+      <path d="M200 96 L200 560" stroke="#c9a24b" stroke-opacity=".25" stroke-width="1"/>
+    </svg>
+    <span class="fly__word fly__word--r" id="flyR">kepuasan.</span>
+  </div>
+</section>
+
+<!-- ============ PREDIKSI ============ -->
+<section class="predict" id="prediksi">
+  <div class="predict__grid">
+
+    <aside class="predict__aside">
+      <p class="eyebrow eyebrow--dark">Formulir perjalanan</p>
+      <h2>Isi data<br>penumpang.</h2>
+      <p class="predict__lead">Tiga langkah singkat. Model akan membaca data Anda dan memperkirakan apakah penumpang tersebut puas.</p>
+      <ol class="steps" id="stepList">
+        <li class="is-active" data-step="0"><span>01</span> Penumpang</li>
+        <li data-step="1"><span>02</span> Penerbangan</li>
+        <li data-step="2"><span>03</span> Layanan</li>
+      </ol>
+    </aside>
+
+    <form class="form" id="form" novalidate autocomplete="off">
+
+      <!-- Langkah 1 -->
+      <fieldset class="panel is-active" data-panel="0">
+        <legend>Penumpang</legend>
+
+        <div class="field">
+          <span class="field__label">Jenis kelamin</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="Gender" value="Female" checked><span>Perempuan</span></label>
+            <label><input type="radio" name="Gender" value="Male"><span>Laki-laki</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="Age">Usia</label>
+          <input class="line" type="number" id="Age" name="Age" min="1" max="100" value="35" inputmode="numeric">
+        </div>
+
+        <div class="field">
+          <span class="field__label">Tipe pelanggan</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="Customer Type" value="First-time"><span>Pertama kali</span></label>
+            <label><input type="radio" name="Customer Type" value="Returning" checked><span>Pelanggan lama</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field__label">Tujuan perjalanan</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="Type of Travel" value="Personal"><span>Pribadi</span></label>
+            <label><input type="radio" name="Type of Travel" value="Business" checked><span>Bisnis</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field__label">Kelas kabin</span>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="Class" value="Economy"><span>Economy</span></label>
+            <label><input type="radio" name="Class" value="Economy Plus"><span>Economy Plus</span></label>
+            <label><input type="radio" name="Class" value="Business" checked><span>Business</span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Langkah 2 -->
+      <fieldset class="panel" data-panel="1">
+        <legend>Penerbangan</legend>
+
+        <div class="field">
+          <label class="field__label" for="FlightDistance">Jarak penerbangan</label>
+          <input class="line" type="number" id="FlightDistance" name="Flight Distance" min="1" max="10000" value="1200" inputmode="numeric">
+          <small>Satuan mengikuti dataset (rata-rata sekitar 1.190).</small>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="DepartureDelay">Keterlambatan keberangkatan (menit)</label>
+          <input class="line" type="number" id="DepartureDelay" name="Departure Delay" min="0" max="2000" value="0" inputmode="numeric">
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="ArrivalDelay">Keterlambatan kedatangan (menit)</label>
+          <input class="line" type="number" id="ArrivalDelay" name="Arrival Delay" min="0" max="2000" value="0" inputmode="numeric">
+        </div>
+      </fieldset>
+
+      <!-- Langkah 3 -->
+      <fieldset class="panel" data-panel="2">
+        <legend>Penilaian layanan</legend>
+        <p class="panel__hint">Beri nilai 1 sampai 5. Nilai 0 berarti layanan tidak berlaku bagi penumpang.</p>
+
+        {% set ratings = [
+          ('Departure and Arrival Time Convenience', 'Kenyamanan jadwal'),
+          ('Ease of Online Booking', 'Kemudahan pemesanan online'),
+          ('Check-in Service', 'Layanan check-in'),
+          ('Online Boarding', 'Boarding online'),
+          ('Gate Location', 'Lokasi gerbang'),
+          ('On-board Service', 'Layanan di pesawat'),
+          ('Seat Comfort', 'Kenyamanan kursi'),
+          ('Leg Room Service', 'Ruang kaki'),
+          ('Cleanliness', 'Kebersihan'),
+          ('Food and Drink', 'Makanan & minuman'),
+          ('In-flight Service', 'Pelayanan awak kabin'),
+          ('In-flight Wifi Service', 'Wi-Fi dalam penerbangan'),
+          ('In-flight Entertainment', 'Hiburan dalam penerbangan'),
+          ('Baggage Handling', 'Penanganan bagasi')
+        ] %}
+        <div class="ratings">
+          {% for key, label in ratings %}
+          <div class="rating">
+            <span class="rating__name">{{ label }}</span>
+            <div class="pills" role="radiogroup" aria-label="{{ label }}">
+              {% for n in range(0, 6) %}
+              <label><input type="radio" name="{{ key }}" value="{{ n }}" {% if n == 3 %}checked{% endif %}><span>{{ n }}</span></label>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <p class="form__error" id="formError" role="alert" hidden></p>
+
+      <div class="form__nav">
+        <button type="button" class="btn btn--ghost" id="btnBack" hidden>Kembali</button>
+        <button type="button" class="btn" id="btnNext">Lanjut <span aria-hidden="true">↗</span></button>
+        <button type="submit" class="btn" id="btnSubmit" hidden>Prediksi kepuasan <span aria-hidden="true">↗</span></button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- ============ HASIL: boarding pass ============ -->
+<section class="result" id="hasil" hidden>
+  <div class="result__bg"></div>
+  <div class="result__inner">
+    <p class="eyebrow">Hasil prediksi</p>
+
+    <article class="ticket" id="ticket">
+      <header class="ticket__head">
+        <span class="ticket__brand">SKYSCORE</span>
+        <span class="ticket__tag">LAPORAN KEPUASAN</span>
+      </header>
+
+      <div class="ticket__verdict">
+        <h3 id="verdict">—</h3>
+        <p id="verdictSub">—</p>
+      </div>
+
+      <div class="meter">
+        <div class="meter__top">
+          <span>Peluang puas</span>
+          <strong id="probText">0%</strong>
+        </div>
+        <div class="meter__bar"><span id="probBar"></span></div>
+      </div>
+
+      <dl class="ticket__grid" id="ticketGrid"></dl>
+
+      <div class="ticket__levers" id="levers" hidden>
+        <h4>Peningkatan dengan dampak terbesar</h4>
+        <p class="ticket__levers-sub">Perkiraan model, bukan hubungan sebab-akibat. Jika penilaian berikut naik satu poin, peluang puas bertambah:</p>
+        <ul id="leverList"></ul>
+      </div>
+
+      <div class="ticket__foot">
+        <div class="barcode" id="barcode" aria-hidden="true"></div>
+        <button type="button" class="btn btn--light" id="btnAgain">Prediksi lagi <span aria-hidden="true">↗</span></button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ MODEL ============ -->
+<section class="model" id="model">
+  <div class="model__inner">
+    <p class="eyebrow">Di balik prediksi</p>
+    <h2>Random Forest,<br>seratus pohon keputusan.</h2>
+    <p class="model__lead">
+      Model dilatih pada {{ '{:,}'.format(metrics.n_train).replace(',', '.') }} penumpang dan diuji pada
+      {{ '{:,}'.format(metrics.n_test).replace(',', '.') }} penumpang yang belum pernah dilihat sebelumnya.
+    </p>
+
+    <div class="metrics">
+      <div class="metric reveal"><span data-count="{{ (metrics.accuracy * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span><small>Accuracy</small></div>
+      <div class="metric reveal"><span data-count="{{ (metrics.precision * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span><small>Precision</small></div>
+      <div class="metric reveal"><span data-count="{{ (metrics.recall * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span><small>Recall</small></div>
+      <div class="metric reveal"><span data-count="{{ (metrics.f1 * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span><small>F1-score</small></div>
+      <div class="metric reveal"><span data-count="{{ (metrics.roc_auc * 100)|round(1) }}" data-dec="1" data-suffix="%">0</span><small>ROC-AUC</small></div>
+    </div>
+
+    <div class="model__cols">
+      <div class="reveal">
+        <h3>Fitur paling berpengaruh</h3>
+        <div class="bars" id="bars"><p class="muted">Memuat…</p></div>
+      </div>
+
+      <div class="reveal">
+        <h3>Confusion matrix</h3>
+        <div class="cm">
+          <div class="cm__cell cm__cell--good"><strong>{{ '{:,}'.format(metrics.confusion_matrix.tn).replace(',', '.') }}</strong><small>Benar: tidak puas</small></div>
+          <div class="cm__cell"><strong>{{ '{:,}'.format(metrics.confusion_matrix.fp).replace(',', '.') }}</strong><small>Salah: dikira puas</small></div>
+          <div class="cm__cell"><strong>{{ '{:,}'.format(metrics.confusion_matrix.fn).replace(',', '.') }}</strong><small>Salah: dikira tidak puas</small></div>
+          <div class="cm__cell cm__cell--good"><strong>{{ '{:,}'.format(metrics.confusion_matrix.tp).replace(',', '.') }}</strong><small>Benar: puas</small></div>
+        </div>
+        <p class="muted cm__note">Dataset: Airline Passenger Satisfaction (Kaggle). Data berasal dari maskapai Amerika, sehingga hasilnya tidak otomatis berlaku untuk maskapai lain.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <span class="footer__logo">SKYSCORE</span>
+  <span>Proyek UTS Pembelajaran Mesin · Random Forest · Flask</span>
+</footer>
+
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+</body>
+</html>
