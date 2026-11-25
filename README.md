@@ -1,88 +1,123 @@
-# Prediksi Kepuasan Penumpang Maskapai (Random Forest)
+# SKYSCORE — Prediksi Kepuasan Penumpang Maskapai
 
-Proyek UTS Pembelajaran Mesin. Berisi notebook Google Colab untuk melatih model dan web app Flask yang siap di-deploy.
+Aplikasi web dan model *Machine Learning* untuk memprediksi tingkat kepuasan penumpang maskapai penerbangan berdasarkan data profil perjalanan, jadwal penerbangan, dan 14 aspek penilaian layanan menggunakan algoritma **Random Forest Classifier**.
+
+Proyek ini dibuat untuk memenuhi tugas Ujian Tengah Semester (UTS) mata kuliah **Pembelajaran Mesin**.
+
+---
+
+## Ringkasan Model & Dataset
 
 - **Dataset:** [Airline Passenger Satisfaction (Kaggle)](https://www.kaggle.com/datasets/mysarahmadbhat/airline-passenger-satisfaction)
-- **Model:** Random Forest Classifier (100 pohon, `max_depth=18`, `min_samples_leaf=3`)
-- **Hasil uji (20% data):** accuracy 96,2%, precision 97,0%, recall 94,2%, F1 95,6%, ROC-AUC 99,4%
+- **Jumlah Data:** 129.880 penumpang (103.904 data latih / 25.976 data uji, rasio 80:20)
+- **Jumlah Fitur:** 22 fitur (profil penumpang, jarak & keterlambatan penerbangan, serta 14 penilaian layanan)
+- **Algoritma:** Random Forest Classifier (`scikit-learn==1.9.1`)
 
-## Isi folder
+### Metrik Evaluasi (Data Uji)
 
-```
+| Metrik | Nilai |
+| :--- | :--- |
+| **Accuracy** | 96,2% (`0.9622`) |
+| **Precision** | 97,0% (`0.9702`) |
+| **Recall** | 94,2% (`0.9420`) |
+| **F1-Score** | 95,6% (`0.9559`) |
+| **ROC-AUC** | 99,4% (`0.9938`) |
+
+---
+
+## Fitur Aplikasi Web
+
+- **Formulir Prediksi 3 Langkah:** Input data penumpang, detail penerbangan, dan 14 penilaian layanan (skala 0–5).
+- **Boarding Pass Hasil Prediksi:** Menampilkan status prediksi (*Puas* / *Tidak Puas*), probabilitas kepuasan, dan ringkasan perjalanan.
+- **Rekomendasi Peningkatan Layanan:** Simulasi sensitivitas model untuk menampilkan hingga 3 aspek layanan dengan dampak kenaikan peluang puas terbesar apabila nilainya ditingkatkan 1 poin.
+- **Dashboard Transparansi Model:** Menampilkan metrik evaluasi, *Confusion Matrix*, dan 10 fitur paling berpengaruh (*Feature Importance*).
+
+---
+
+## Struktur Direktori
+
+```text
 UTS-ML-Kepuasan-Penumpang/
 ├── 01_colab/
-│   └── Kepuasan_Penumpang_RandomForest.ipynb   <- buka di Google Colab
+│   └── Kepuasan_Penumpang_RandomForest.ipynb   # Notebook eksplorasi & pelatihan model (Google Colab)
 ├── 02_webapp/
-│   ├── app.py                 <- server Flask + API prediksi
-│   ├── train_model.py         <- latih ulang model dari terminal (opsional)
-│   ├── requirements.txt
-│   ├── Procfile, render.yaml  <- konfigurasi deploy
-│   ├── model/                 <- model.joblib, metrics.json, feature_importance.json
-│   ├── templates/index.html
-│   └── static/ (css, js, img)
+│   ├── app.py                                  # Server Flask & REST API
+│   ├── train_model.py                          # Script latih ulang model via CLI
+│   ├── requirements.txt                        # Dependensi Python
+│   ├── Procfile                                # Konfigurasi start command untuk deployment
+│   ├── model/
+│   │   ├── model.joblib                        # Artefak model Random Forest terlatih
+│   │   ├── metrics.json                        # Metrik evaluasi model
+│   │   └── feature_importance.json             # Skor kepentingan fitur
+│   ├── templates/
+│   │   └── index.html                          # Halaman utama aplikasi
+│   └── static/
+│       ├── css/style.css                       # Styling antarmuka
+│       ├── js/main.js                          # Logika interaksi & animasi scroll
+│       └── img/sky.jpg                         # Aset gambar latar belakang
 └── README.md
 ```
 
-## Langkah 1: Jalankan notebook di Colab
+---
 
-1. Unduh `airline_passenger_satisfaction.csv` dari Kaggle.
-2. Buka `01_colab/Kepuasan_Penumpang_RandomForest.ipynb` di [colab.research.google.com](https://colab.research.google.com) (File > Upload notebook).
-3. Jalankan semua sel dari atas. Saat sel unggah muncul, pilih file CSV tadi.
-4. Sel terakhir mengunduh `model_kepuasan_penumpang.zip`.
-5. Ekstrak zip itu dan **timpa** isi `02_webapp/model/` (3 berkas). Ini penting agar model di web app berasal dari notebook Anda sendiri.
-6. Lihat angka `Versi scikit-learn` yang tercetak di akhir notebook. Ubah baris `scikit-learn==...` di `02_webapp/requirements.txt` agar sama dengan versi itu, supaya model bisa dimuat tanpa error.
+## Cara Menjalankan di Komputer Lokal
 
-> Model bawaan di folder `model/` sudah dilatih dengan kode yang sama, jadi web app bisa langsung dicoba sebelum Anda menjalankan Colab.
+1. Masuk ke direktori web app:
+   ```bash
+   cd 02_webapp
+   ```
 
-## Langkah 2: Coba web app di komputer
+2. Instal seluruh dependensi:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+3. Jalankan server Flask:
+   ```bash
+   python app.py
+   ```
+
+4. Buka browser dan akses:
+   ```text
+   http://127.0.0.1:5000
+   ```
+
+### Melatih Ulang Model (Opsional)
+
+Jika ingin melatih ulang model dari file CSV dataset Kaggle:
 ```bash
 cd 02_webapp
-pip install -r requirements.txt
-python app.py
+python train_model.py path/ke/airline_passenger_satisfaction.csv
+```
+Perintah ini akan memperbarui berkas `model.joblib`, `metrics.json`, dan `feature_importance.json` di folder `02_webapp/model/`.
+
+---
+
+## Endpoint API
+
+| Method | Endpoint | Deskripsi |
+| :--- | :--- | :--- |
+| `GET` | `/` | Halaman utama aplikasi web SKYSCORE |
+| `POST` | `/api/predict` | Menerima JSON 22 fitur perjalanan, mengembalikan status kepuasan, probabilitas, dan rekomendasi peningkatan layanan |
+| `GET` | `/api/model-info` | Mengembalikan metrik evaluasi model dan daftar 10 fitur paling berpengaruh |
+| `GET` | `/healthz` | *Health check* status server (`{"status": "ok"}`) |
+
+---
+
+## Deployment
+
+Folder `02_webapp` sudah dilengkapi berkas `Procfile` untuk deployment ke platform PaaS seperti **Render** atau **Railway**:
+
+```procfile
+web: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
 ```
 
-Buka http://127.0.0.1:5000
+Pastikan *Root Directory* pada platform deployment diarahkan ke `02_webapp` (jika repo berisi folder `01_colab` dan `02_webapp`).
 
-## Langkah 3: Unggah ke GitHub
+---
 
-```bash
-cd 02_webapp
-git init
-git add .
-git commit -m "Web app prediksi kepuasan penumpang"
-git branch -M main
-git remote add origin https://github.com/<username>/<nama-repo>.git
-git push -u origin main
-```
+## Catatan & Keterbatasan
 
-Folder `01_colab` boleh ikut diunggah sebagai repositori terpisah atau dimasukkan ke repo yang sama.
-
-## Langkah 4: Deploy (pilih salah satu)
-
-**Render (gratis, paling mudah)**
-1. Daftar di render.com, pilih New > Web Service, lalu hubungkan repo GitHub.
-2. Build command: `pip install -r requirements.txt`
-3. Start command: `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-4. Klik Deploy. Tautan hasilnya yang dilampirkan ke laporan.
-
-Catatan: layanan gratis Render tertidur jika lama tidak dipakai, jadi buka tautannya sekali sebelum presentasi atau merekam video.
-
-**Alternatif:** PythonAnywhere atau Hugging Face Spaces (pilih SDK Docker).
-
-## Checklist pengumpulan UTS
-
-- [ ] Link aplikasi yang di-deploy
-- [ ] Link GitHub repository
-- [ ] Laporan artikel (PDF dan DOC, 2 kolom, Times New Roman 10, 6 sampai 10 halaman)
-- [ ] Hasil Turnitin (di bawah 25%) dan cek AI detection (di bawah 30%)
-- [ ] Video demo (YouTube) dan tautannya dicantumkan di laporan
-- [ ] File Google Colab (.ipynb)
-- [ ] Jurnal rujukan (diunggah ke Drive)
-
-## Catatan penting
-
-- Kolom rating bernilai 0 berarti layanan tidak berlaku bagi penumpang.
-- Dataset berasal dari maskapai Amerika, jadi hasilnya tidak otomatis berlaku untuk maskapai Indonesia. Cantumkan ini sebagai keterbatasan di laporan.
-- Bagian "Peningkatan dengan dampak terbesar" di kartu hasil adalah perkiraan model (menaikkan satu penilaian lalu memprediksi ulang), bukan hubungan sebab-akibat.
-- Font tampilan (Cormorant Garamond dan Inter) dimuat dari Google Fonts. Tanpa internet, tampilan memakai font serif bawaan.
+- Nilai `0` pada kolom penilaian layanan menandakan layanan tersebut tidak berlaku bagi penumpang.
+- Dataset berasal dari maskapai Amerika Serikat, sehingga hasil prediksi tidak otomatis mencerminkan karakteristik penumpang maskapai di wilayah lain.
+- Bagian *"Peningkatan dengan dampak terbesar"* merupakan perkiraan simulasi model (menaikkan skor 1 poin lalu memprediksi ulang), bukan hubungan sebab-akibat kausal.
